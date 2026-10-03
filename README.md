@@ -37,6 +37,7 @@ flowchart LR
 ### pr-flow (detta repo)
 
 Innehåller:
+
 - **Applikationskod** i `frontend/`
 - **GitOps-manifest** i `environments/`
 - **CI/CD** i `.github/workflows/`
@@ -44,6 +45,7 @@ Innehåller:
 ### infrastructure
 
 Innehåller:
+
 - **Flux-konfiguration** i `infrastructure-flux/apps/pr-flow/`
 - **Kubernetes-komponenter** i `infrastructure-flux/components/`
 
@@ -118,11 +120,13 @@ Innehåller standardmanifest för appen. Används av alla miljöer.
 ### Production (`environments/production/`)
 
 Produktions-specifika overrides:
+
 ```yaml
 # environments/production/kustomization.yaml
 resources:
   - ../base
 ```
+
 ```yaml
 # environments/production/namespace.yaml (override)
 apiVersion: v1
@@ -130,18 +134,19 @@ kind: Namespace
 metadata:
   name: pr-flow
   labels:
-    environment: production  # ← Unik för prod
+    environment: production # ← Unik för prod
 ```
 
 ### PR Previews (`environments/pr/<NUM>/`)
 
 Dynamiskt skapade av GitHub Actions:
+
 ```yaml
 # environments/pr/157/kustomization.yaml
 resources:
   - ../../base
 
-namespace: pr-157  # ← Unik per PR
+namespace: pr-157 # ← Unik per PR
 
 patches:
   # Image-patch: använder PR-specifik image
@@ -184,7 +189,7 @@ kind: Kustomization
 metadata:
   name: pr-flow
 spec:
-  path: environments/production  # ← Läser pr-flow/environments/production
+  path: environments/production # ← Läser pr-flow/environments/production
   sourceRef:
     kind: GitRepository
     name: pr-flow
@@ -196,11 +201,11 @@ kind: Kustomization
 metadata:
   name: pr-flow-previews
 spec:
-  path: ./environments/pr       # ← Läser pr-flow/environments/pr
+  path: ./environments/pr # ← Läser pr-flow/environments/pr
   sourceRef:
     kind: GitRepository
     name: pr-flow
-  prune: true                  # Städar bort resurser vid borttagning
+  prune: true # Städar bort resurser vid borttagning
 ```
 
 ---
@@ -246,7 +251,7 @@ flowchart TB
     CREATE_OVERLAY --> UPDATE_KUSTOMIZE
     UPDATE_KUSTOMIZE --> COMMIT
     COMMIT --> GIT
-    
+
     ENV_PR_KUSTOMIZE --> FLUX
     ENV_PR --> FLUX
     ENV_BASE --> ENV_PR
@@ -257,28 +262,28 @@ flowchart TB
 
 ### Steg-för-steg
 
-| Steg | Action | Var |
-|------|--------|-----|
-| 1 | Developer skapar PR | GitHub |
-| 2 | GitHub Actions triggas | `.github/workflows/pr-preview.yaml` |
-| 3 | Kör tester | CI |
-| 4 | Bygger image | `frontend/Dockerfile` |
-| 5 | Pushar till GHCR | Tag: `pr-<NUM>-<sha>` |
-| 6 | Skapar `environments/pr/<NUM>/` | med base + patches |
-| 7 | Uppdaterar `environments/pr/kustomization.yaml` | Lägger till `./<NUM>` |
-| 8 | Commit & push | Till PR-branchen |
-| 9 | Flux ser ändringarna | `infrastructure-flux/apps/pr-flow/` |
-| 10 | Flux deployar | `pr-<NUM>` namespace |
+| Steg | Action                                          | Var                                 |
+| ---- | ----------------------------------------------- | ----------------------------------- |
+| 1    | Developer skapar PR                             | GitHub                              |
+| 2    | GitHub Actions triggas                          | `.github/workflows/pr-preview.yaml` |
+| 3    | Kör tester                                      | CI                                  |
+| 4    | Bygger image                                    | `frontend/Dockerfile`               |
+| 5    | Pushar till GHCR                                | Tag: `pr-<NUM>-<sha>`               |
+| 6    | Skapar `environments/pr/<NUM>/`                 | med base + patches                  |
+| 7    | Uppdaterar `environments/pr/kustomization.yaml` | Lägger till `./<NUM>`               |
+| 8    | Commit & push                                   | Till PR-branchen                    |
+| 9    | Flux ser ändringarna                            | `infrastructure-flux/apps/pr-flow/` |
+| 10   | Flux deployar                                   | `pr-<NUM>` namespace                |
 
 ### PR Stängning
 
-| Steg | Action |
-|------|--------|
-| 1 | Developer stänger PR |
-| 2 | GitHub Actions triggas |
-| 3 | Tar bort `environments/pr/<NUM>/` |
-| 4 | Uppdaterar `environments/pr/kustomization.yaml` |
-| 5 | Flux tar bort resurser (prune: true) |
+| Steg | Action                                          |
+| ---- | ----------------------------------------------- |
+| 1    | Developer stänger PR                            |
+| 2    | GitHub Actions triggas                          |
+| 3    | Tar bort `environments/pr/<NUM>/`               |
+| 4    | Uppdaterar `environments/pr/kustomization.yaml` |
+| 5    | Flux tar bort resurser (prune: true)            |
 
 ---
 
@@ -301,6 +306,7 @@ flowchart TB
 ```
 
 **Regler:**
+
 1. GitHub Actions **aldrig** applicerar direkt till Kubernetes
 2. Flux **aldrig** ändrar Git
 3. Allt går via Git
@@ -309,11 +315,11 @@ flowchart TB
 
 ## Miljöer
 
-| Miljö | Källa | Styrning | URL |
-|-------|-------|----------|-----|
-| **production** | `environments/production/` | Flux | `prflow.example.com` |
-| **preview** | `environments/pr/<NUM>/` | Flux + GitHub Actions | `pr-<NUM>.example.com` |
-| **dev** | lokalt | Tilt | `localhost:3000` |
+| Miljö          | Källa                      | Styrning              | URL                    |
+| -------------- | -------------------------- | --------------------- | ---------------------- |
+| **production** | `environments/production/` | Flux                  | `prflow.example.com`   |
+| **preview**    | `environments/pr/<NUM>/`   | Flux + GitHub Actions | `pr-<NUM>.example.com` |
+| **dev**        | lokalt                     | Tilt                  | `localhost:3000`       |
 
 ---
 
@@ -346,6 +352,7 @@ https://pr-<NUM>.example.com
 ```
 
 **Förutsättningar:**
+
 - `external-dns` konfigurerad i klustret
 - Gateway `traefik-gateway` finns i `flux-system`
 - DNS pekar mot klustret
