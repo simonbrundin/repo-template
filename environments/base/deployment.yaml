@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/simonbrundin/pr-flow:latest  # Override this in overlays
+          image: nuxt-app:latest
           ports:
             - containerPort: 3000
           resources:

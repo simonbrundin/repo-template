@@ -1,0 +1,1 @@
+Jag vill uppdatera mitt `simon dev` kommando så när jag kör det så kollar det efter {repot-jag-befinner-mig-i}/environments/dev/tilt.yaml och kör /home/simon/repos/repo-template/environments/dev/Tiltfile

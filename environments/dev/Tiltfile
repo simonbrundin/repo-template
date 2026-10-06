@@ -1,0 +1,36 @@
+# =============================================================================
+# Tiltfile för dev - Läser resources från tilt.yaml
+# =============================================================================
+
+# Hämta repo-namn och branch för dynamiska namn
+repo_name = os.path.basename(os.getcwd())
+branch = str(local("git rev-parse --abbrev-ref HEAD", quiet=True)).strip()
+cluster_name = repo_name + "." + branch
+
+# Beräkna unik port-offset baserat på branch (unik hash)
+branch_hash = str(local("git rev-parse --abbrev-ref HEAD | cksum", quiet=True)).strip().split()[0]
+port_offset = int(branch_hash) % 100
+
+# Tillåt endast Kind-klustret
+allow_k8s_contexts(cluster_name)
+
+# Läs tilt.yaml config
+config = read_yaml("tilt.yaml")
+resources = config.get("resources", {})
+
+# Ladda Kubernetes manifest med kustomize
+k8s_yaml(kustomize("."))
+
+# Skapa bygg images från Dockerfiles
+for name, resource in resources.items():
+    res_type = resource.get("type")
+    
+    if res_type == "dockerfile":
+        image_name = resource.get("image-name")
+        dockerfile = resource.get("dockerfile")
+        docker_build(image, dockerfile)
+        
+        container_port = resource.get("port", 3000)
+        host_port = container_port + port_offset
+    if name == "nuxt":
+        k8s_resource(workload="nuxt-deployment", new_name=name, port_forwards=str(host_port) + ":" + str(container_port))
