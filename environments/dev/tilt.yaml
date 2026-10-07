@@ -21,6 +21,6 @@ resources:
 
   postgres:
     type: kustomization
-    path: ./db
+    path: ../base/db
     workload: repo-template-db
     port: 5432
