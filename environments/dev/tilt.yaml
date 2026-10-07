@@ -4,6 +4,9 @@ resources:
     image-name: nuxt-app
     dockerfile: ../../src/nuxt
     port: 80
+    links:
+      - path: /health/
+        name: Health
   go-api:
     type: dockerfile
     image-name: go-api
@@ -11,4 +14,6 @@ resources:
     port: 8080
     links:
       - path: /docs/
-        name: API Docs (Scalar)
+        name: Scalar
+      - path: /docs/#tag/health/GET/health
+        name: Health
