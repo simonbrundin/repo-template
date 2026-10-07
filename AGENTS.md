@@ -20,7 +20,7 @@
 | ------------ | ------------ | ------------------- | ---- | ------------------------- |
 | **Frontend** | Nuxt 3 (SPA) | `nginx:alpine`      | 80   | Interface, statiska filer |
 | **API**      | Go + Gin     | `gcr.io/distroless` | 8080 | REST API, affärslogik     |
-| **CLI**      | Go          | Lokal binär         | -    | Utvecklingsverktyg       |
+| **CLI**      | Go           | Lokal binär         | -    | Utvecklingsverktyg        |
 | **Databas**  | PostgreSQL   | (extern)            | 5432 | Data-lagring              |
 
 ## Kataloger
@@ -165,7 +165,7 @@ flowchart LR
 | ------------------------- | ------------------------------------------------------------------------- |
 | **Nuxt SPA (ej SSR)**     | SEO oviktigt, enklare arkitektur, mindre image, enklare att byta frontend |
 | **Go API**                | Snabb, enkel distribution, bra för REST, all affärslogik här              |
-| **CLI lokalt kompilerad** | Enklare än Docker, inget extra image, snabb iteration                    |
+| **CLI lokalt kompilerad** | Enklare än Docker, inget extra image, snabb iteration                     |
 | **Separerade containers** | Skalas oberoende, ren separation, frontend-backend oberoende              |
 | **nginx för SPA**         | Minimal image (63MB), bra för statiska filer                              |
 | **distroless för Go**     | Minimal image (17MB), säkert                                              |
