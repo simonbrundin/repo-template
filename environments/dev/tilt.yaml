@@ -9,3 +9,6 @@ resources:
     image-name: go-api
     dockerfile: ../../src/go
     port: 8080
+    links:
+      - path: /docs/
+        name: API Docs (Scalar)
