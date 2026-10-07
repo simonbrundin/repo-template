@@ -8,3 +8,5 @@ resources:
   - namespace.yaml
   - nuxt-deployment.yaml
   - nuxt-service.yaml
+  - go-api-deployment.yaml
+  - go-api-service.yaml
