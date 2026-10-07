@@ -1,0 +1,38 @@
+basePath: /
+host: localhost:8080
+info:
+  contact: {}
+  description: API for repo-template project
+  title: Repo Template API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Returns the health status of the API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /hello:
+    get:
+      description: Returns a hello message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Hello world
+      tags:
+      - greeting
+swagger: "2.0"

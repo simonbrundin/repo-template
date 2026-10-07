@@ -15,7 +15,22 @@
 #
 
 # =============================================================================
-# Stage 1: Builder
+# Stage 1: Generate OpenAPI docs with swag
+# =============================================================================
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS swag
+
+ENV GOTOOLCHAIN=auto
+
+RUN apk add --no-cache go git && \
+    go install github.com/swaggo/swag/cmd/swag@v1.16.6 && \
+    mv $(go env GOPATH)/bin/swag /usr/local/bin/
+
+WORKDIR /build
+COPY . .
+RUN swag init -g cmd/api/main.go -o cmd/api/docs --parseFuncBody --quiet
+
+# =============================================================================
+# Stage 2: Builder
 # =============================================================================
 FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS builder
 
@@ -50,8 +65,11 @@ LABEL org.opencontainers.image.title="Go API" \
       org.opencontainers.image.source="https://github.com/simon/repo-template" \
       org.opencontainers.image.description="Minimal Go API server"
 
-# Copy binary (built as static, no dependencies needed)
+# Copy binary and OpenAPI docs
 COPY --from=builder /api /api
+COPY --from=swag /build/cmd/api/docs /app/docs
+
+ENV DOCS_PATH=/app/docs/swagger.json
 
 # Non-root (distroless nonroot user is UID 65532)
 USER nonroot

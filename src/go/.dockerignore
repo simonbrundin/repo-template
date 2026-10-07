@@ -19,9 +19,8 @@ cmd/**/bin/
 # Test files
 *_test.go
 
-# Documentation
-*.md
-!README.md
+# Generated OpenAPI docs (regenerated in Docker build)
+cmd/api/docs/
 
 # Docker
 Dockerfile*
