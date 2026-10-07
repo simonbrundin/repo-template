@@ -11,11 +11,3 @@ namespace: dev
 
 resources:
   - ../../base/db
-
-# ConfigMap med schema + seeds (seeds ignoreras i prod)
-configMapGenerator:
-  - name: repo-template-db-schema
-    behavior: replace
-    files:
-      - schema.sql=../../base/db/schema.sql
-      - seeds.sql=../../base/db/seeds.sql

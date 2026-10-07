@@ -9,3 +9,9 @@ namespace: dev
 resources:
   - ../base
   - ./db
+
+images:
+  - name: go-api
+    newName: localhost:5000/go-api
+  - name: nuxt-app
+    newName: localhost:5000/nuxt-app

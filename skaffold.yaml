@@ -2,29 +2,23 @@
 # Usage: skaffold dev
 apiVersion: skaffold/v4beta14
 kind: Config
+metadata:
+  name: repo-template
 
 build:
   artifacts:
-    - image: go-api
+    - image: localhost:5000/go-api
+      context: src/go
       docker:
-        dockerfile: src/go/Dockerfile
-        context: src/go
-    - image: nuxt-app
+        dockerfile: Dockerfile
+    - image: localhost:5000/nuxt-app
+      context: src/nuxt
       docker:
-        dockerfile: src/nuxt/Dockerfile
-        context: src/nuxt
+        dockerfile: Dockerfile
 
-deploy:
-  kubectl:
-    manifests:
-      - environments/dev/*.yaml
+manifests:
+  kustomize:
+    paths:
+      - environments/dev
 
-portForward:
-  - resourceType: service
-    resourceName: go-api
-    port: 8080
-    localPort: 8080
-  - resourceType: service
-    resourceName: nuxt-app
-    port: 80
-    localPort: 3000
+profiles: []
