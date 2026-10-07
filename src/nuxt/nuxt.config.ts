@@ -3,6 +3,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   ssr: false, // SPA mode - ingen server-side rendering
   devtools: { enabled: true },
+  future: {
+    compatibilityVersion: 4,
+  },
 
   // SPA-konfiguration
   app: {
