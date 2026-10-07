@@ -19,7 +19,6 @@
 </template>
 
 <script setup lang="ts">
-const config = useRuntimeConfig()
 const loading = ref(true)
 const error = ref<string | null>(null)
 const healthData = ref<{
@@ -28,12 +27,16 @@ const healthData = ref<{
   timestamp: string
 } | null>(null)
 
+// Get API URL from environment variable at runtime
+const apiBase = import.meta.env.VITE_API_BASE || '/api'
+
 async function fetchHealth() {
   loading.value = true
   error.value = null
   
   try {
-    const response = await fetch(`${config.public.apiBase}/health`)
+    // Use /api prefix - nginx will proxy to Go API
+    const response = await fetch('/api/health')
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`)
     }
