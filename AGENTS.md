@@ -23,6 +23,55 @@
 | **CLI**      | Go           | Lokal binär         | -    | Utvecklingsverktyg        |
 | **Databas**  | PostgreSQL   | (extern)            | 5432 | Data-lagring              |
 
+## Kommunikation
+
+### Arkitektur
+
+Nuxt och Go API kommunicerar via nginx proxy för att undvika CORS och hårdkodade portar:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Kubernetes Cluster                       │
+│                                                             │
+│   ┌─────────────┐       ┌─────────────┐       ┌─────────┐  │
+│   │  Nuxt SPA   │──────▶│   nginx    │──────▶│ Go API  │  │
+│   │  (nginx)   │ /api/ │   proxy    │       │  :8080  │  │
+│   └─────────────┘       └─────────────┘       └─────────┘  │
+│         │                     │                     │       │
+│         │                     │                     │       │
+│         ▼                     ▼                     ▼       │
+│   Browser hämta         proxy /api/           Go binary   │
+│   statiska filer       till :8080             /health     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Varför nginx proxy?
+
+| Problem | Lösning |
+|---------|--------|
+| CORS vid cross-origin | Alla anrop är same-origin via nginx |
+| Hårdkodade portar | Relative URLs (`/api/health`) |
+| Olika portar i dev vs prod | Samma kod, nginx sköter routing |
+
+### Implementation
+
+**Nuxt** - använder relativ URL:
+```typescript
+const response = await fetch('/api/health')
+```
+
+**nginx** - proxy config i Dockerfile:
+```nginx
+location /api/ {
+    proxy_pass http://go-api-service:8080/;
+}
+```
+
+**Resultat:**
+- `localhost:9998/api/health` → nginx → `go-api-service:8080/health`
+- Ingen CORS behövs
+- Inga hårdkodade portar
+
 ## API Dokumentation (OpenAPI + Scalar)
 
 Go API använder OpenAPI 2.0 med Scalar UI för dokumentation:

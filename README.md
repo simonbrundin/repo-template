@@ -18,10 +18,24 @@ flowchart LR
 
 | Lager        | Teknologi    | Docker Image   | Port | Syfte                 |
 | ------------ | ------------ | -------------- | ---- | --------------------- |
-| **Frontend** | Nuxt 3 (SPA) | `nginx:alpine` | 80   | Interface             |
+| **Frontend** | Nuxt 3 (SPA) | `nginx:alpine` | 80   | Interface + API proxy |
 | **API**      | Go + Gin     | `distroless`   | 8080 | REST API, affärslogik |
 | **CLI**      | Go          | Lokal binär    | -    | Utvecklingsverktyg   |
 | **Databas**  | PostgreSQL   | (extern)       | 5432 | Data-lagring          |
+
+### Frontend → API Kommunikation
+
+Nuxt (nginx) proxar `/api/` förfrågningar till Go API:
+
+```
+Browser → Nuxt SPA → nginx → Go API
+           /api/health    proxy   :8080
+```
+
+**Fördelar:**
+- Samma-origin anrop (ingen CORS)
+- Inga hårdkodade portar
+- Samma kod i dev och prod
 
 ### API Dokumentation
 
