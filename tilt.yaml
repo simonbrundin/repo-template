@@ -1,6 +1,25 @@
 resources:
-  nuxt-app:
+  nuxt:
     type: dockerfile
     image-name: nuxt-app
     dockerfile: src/nuxt
     port: 80
+    links:
+      - name: Nuxt
+        path: /
+
+  api:
+    type: dockerfile
+    image-name: go-api
+    dockerfile: src/go
+    port: 8080
+    links:
+      - name: Swagger
+        path: /docs/
+
+  chartdb:
+    type: kustomization
+    port: 8080
+    links:
+      - name: ChartDB
+        path: /
