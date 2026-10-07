@@ -1,0 +1,52 @@
+# PostgreSQL Cluster managed by CloudNativePG
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: repo-template-db
+  labels:
+    app.kubernetes.io/name: repo-template
+spec:
+  description: "PostgreSQL database for repo-template"
+  
+  # Use the storage class from cluster-components
+  storage:
+    storageClass: cnpg
+    size: 1Gi
+
+  # Single instance for development
+  instances: 1
+
+  # PostgreSQL image
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.4
+
+  # Bootstrap - create the app database
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+  
+  # Enable superuser access for debugging
+  enableSuperuserAccess: true
+
+  # PostgreSQL configuration
+  postgresql:
+    parameters:
+      shared_buffers: "256MB"
+      max_connections: "100"
+    pg_hba:
+      - local all all trust
+      - host all all 127.0.0.1/32 md5
+      - host all all ::1/128 md5
+
+  # Resources
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  # Backup configuration (disabled for dev)
+  backup:
+    retentionPolicy: "1d"
