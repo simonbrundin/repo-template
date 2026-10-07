@@ -5,8 +5,8 @@ resources:
     dockerfile: ../../src/nuxt
     port: 3000
 
-  # go:
-  #   type: docker_build
-  #   image: ghcr.io/simonbrundin/myapp
-  #   context: ../../src/go
-  #   port: 8080
+  go:
+    type: dockerfile
+    image: go-api
+    context: ../../src/go
+    port: 8080

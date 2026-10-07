@@ -1,0 +1,7 @@
+resources:
+  nuxt:
+    type: dockerfile
+    image-name: nuxt-app
+    dockerfile: src/nuxt/Dockerfile
+    context: src/nuxt/
+    port: 80
