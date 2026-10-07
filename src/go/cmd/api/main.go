@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	openapiui "github.com/PeterTakahashi/gin-openapi/openapiui"
 )
@@ -45,6 +46,16 @@ func withHost(specJSON []byte, host string) ([]byte, error) {
 
 func main() {
 	r := gin.Default()
+
+	// CORS middleware - allow all origins for development
+	// In production, use AllowedOrigins in config
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// API documentation with Scalar UI
 	r.GET("/docs/*any", openapiui.WrapHandler(openapiui.Config{
