@@ -1,0 +1,4 @@
+# Environment
+environments/dev/.env
+environments/pr/.env
+environments/prod/.env
