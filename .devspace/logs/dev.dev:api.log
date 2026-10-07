@@ -1,0 +1,8 @@
+{"level":"info","msg":"dev:api Waiting for pod to become ready...","time":"2026-10-08T01:58:01+02:00"}
+{"level":"warning","msg":"dev:api Pod go-api-devspace-6d4bd48f8-fhnmr has critical status: CrashLoopBackOff. DevSpace will continue waiting, but this operation might timeout","time":"2026-10-08T01:58:12+02:00"}
+{"level":"warning","msg":"dev:api Pod go-api-devspace-6d4bd48f8-fhnmr has critical status: RunContainerError. DevSpace will continue waiting, but this operation might timeout","time":"2026-10-08T01:58:22+02:00"}
+{"level":"info","msg":"dev:api Waiting for pod to become ready...","time":"2026-10-08T01:58:59+02:00"}
+{"level":"warning","msg":"dev:api Pod go-api-devspace-6d4bd48f8-fhnmr has critical status: RunContainerError. DevSpace will continue waiting, but this operation might timeout","time":"2026-10-08T01:59:10+02:00"}
+{"level":"warning","msg":"dev:api Pod go-api-devspace-6d4bd48f8-fhnmr has critical status: RunContainerError. DevSpace will continue waiting, but this operation might timeout","time":"2026-10-08T01:59:20+02:00"}
+{"level":"warning","msg":"dev:api Pod go-api-devspace-6d4bd48f8-fhnmr has critical status: RunContainerError. DevSpace will continue waiting, but this operation might timeout","time":"2026-10-08T01:59:30+02:00"}
+{"level":"warning","msg":"dev:api Pod go-api-devspace-6d4bd48f8-fhnmr has critical status: RunContainerError. DevSpace will continue waiting, but this operation might timeout","time":"2026-10-08T01:59:40+02:00"}

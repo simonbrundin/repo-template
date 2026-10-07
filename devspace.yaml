@@ -1,45 +1,43 @@
 # DevSpace configuration for local Kubernetes development
 # Usage: devspace dev
-version: v2
+version: v2beta1
 name: repo-template
+
+# Images to build (optional - uncomment if you want DevSpace to build)
+# images:
+#   api:
+#     image: localhost:5000/go-api
+#     dockerfile: ./src/go/Dockerfile
+#   nuxt:
+#     image: localhost:5000/nuxt-app
+#     dockerfile: ./src/nuxt/Dockerfile
 
 # Deployments using existing Kubernetes manifests
 deployments:
   api:
     kubectl:
       manifests:
-        - environments/dev/go-api-*.yaml
+        - environments/base/go-api-deployment.yaml
+        - environments/base/go-api-service.yaml
 
   nuxt:
     kubectl:
       manifests:
-        - environments/dev/nuxt-app-*.yaml
+        - environments/base/nuxt-deployment.yaml
+        - environments/base/nuxt-service.yaml
 
 # Development mode with hot-reloading
 dev:
   api:
-    imageSelector: go-api
-    command: []
+    imageSelector: localhost:5000/go-api:latest
     sync:
       - path: ./src/go
-        destination: /app
     terminal:
       enabled: true
 
   nuxt:
-    imageSelector: nuxt-app
-    command: []
+    imageSelector: localhost:5000/nuxt-app:latest
     sync:
       - path: ./src/nuxt
-        destination: /app
     terminal:
       enabled: true
-
-# Port forwarding for local access
-ports:
-  - port: 8080
-    forward: 8080
-    label: API
-  - port: 3000
-    forward: 3000
-    label: Nuxt

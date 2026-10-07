@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nuxt-app
-          image: nuxt-app:latest
+          image: localhost:5000/nuxt-app:latest
           ports:
             - containerPort: 80
           resources:
