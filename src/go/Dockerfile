@@ -7,7 +7,6 @@
 # - BuildKit cache mounts for faster rebuilds
 # - Distroless runtime (minimal attack surface)
 # - Non-root user
-# - Pinned base image digests
 # - HEALTHCHECK
 # - Cross-platform build support
 #
@@ -37,21 +36,19 @@ ARG TARGETARCH
 # Copy source and build
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    go build -ldflags="-s -w" -trimpath -o /api ./cmd/api && \
-    go build -ldflags="-s -w" -trimpath -o /cli ./cmd/cli
+    go build -ldflags="-s -w" -trimpath -o /api ./cmd/api
 
 # =============================================================================
 # Stage 2: Runtime - distroless (minimal attack surface)
 # =============================================================================
 FROM gcr.io/distroless/static-debian12:nonroot AS runtime
 
-LABEL org.opencontainers.image.title="Go API & CLI" \
+LABEL org.opencontainers.image.title="Go API" \
       org.opencontainers.image.source="https://github.com/simon/repo-template" \
-      org.opencontainers.image.description="Minimal Go API server with CLI"
+      org.opencontainers.image.description="Minimal Go API server"
 
-# Copy binaries (built as static, no dependencies needed)
+# Copy binary (built as static, no dependencies needed)
 COPY --from=builder /api /api
-COPY --from=builder /cli /cli
 
 # Non-root (distroless nonroot user is UID 65532)
 USER nonroot

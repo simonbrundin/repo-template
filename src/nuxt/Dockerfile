@@ -6,6 +6,7 @@
 #   Browser → Nuxt SPA → Go API → PostgreSQL
 #
 # Stages:
+#   - base: Shared dependencies
 #   - dev: Development server (bun)
 #   - builder: Builds static SPA files
 #   - runtime: nginx serves static files
@@ -16,15 +17,21 @@
 #
 
 # =============================================================================
-# Dev Stage: Full development environment
+# Base: Shared dependencies (cached layer)
 # =============================================================================
-FROM oven/bun:1-alpine AS dev
+FROM oven/bun:1-alpine AS base
 
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies once (shared by dev and builder)
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN --mount=type=cache,target=/home/bun/.cache/install \
+    bun install --frozen-lockfile
+
+# =============================================================================
+# Dev Stage: Full development environment
+# =============================================================================
+FROM base AS dev
 
 # Copy source
 COPY . .
@@ -36,17 +43,11 @@ CMD ["bun", "run", "dev", "--", "--host", "0.0.0.0"]
 # =============================================================================
 # Builder Stage: Build static SPA files
 # =============================================================================
-FROM oven/bun:1-alpine AS builder
-
-WORKDIR /app
-
-# Install dependencies
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+FROM base AS builder
 
 # Copy source and build
 COPY . .
-RUN bun run generate  # Generates static files in .output/public
+RUN bun run generate
 
 # =============================================================================
 # Runtime Stage: Serve static files with nginx
