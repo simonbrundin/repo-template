@@ -34,7 +34,12 @@ func withHost(specJSON []byte, host string) ([]byte, error) {
 	if err := json.Unmarshal(specJSON, &spec); err != nil {
 		return nil, err
 	}
-	spec["host"] = host
+	// If host is empty, remove the host field (uses relative URLs)
+	if host == "" {
+		delete(spec, "host")
+	} else {
+		spec["host"] = host
+	}
 	return json.Marshal(spec)
 }
 
@@ -46,9 +51,6 @@ func main() {
 		SpecURL: "/docs/openapi.json",
 		SpecProvider: func() ([]byte, error) {
 			host := os.Getenv("API_HOST")
-			if host == "" {
-				host = "localhost:8080" // fallback
-			}
 			spec, err := readSwaggerSpec()
 			if err != nil {
 				return nil, err

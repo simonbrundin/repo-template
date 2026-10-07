@@ -39,4 +39,4 @@ spec:
             - name: APP_VERSION
               value: "dev"
             - name: API_HOST
-              value: "go-api-service:8080"
+              value: ""
