@@ -5,3 +5,15 @@ namespace: dev
 
 resources:
   - ../base
+
+patches:
+  # Add NUXT_PUBLIC_API_BASE for local development
+  - target:
+      kind: Deployment
+      name: nuxt-app
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: NUXT_PUBLIC_API_BASE
+            value: "http://localhost:17998"

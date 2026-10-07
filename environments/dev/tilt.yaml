@@ -4,9 +4,6 @@ resources:
     image-name: nuxt-app
     dockerfile: ../../src/nuxt
     port: 80
-    env:
-      - name: NUXT_PUBLIC_API_BASE
-        value: "http://localhost:17998"
   go-api:
     type: dockerfile
     image-name: go-api
