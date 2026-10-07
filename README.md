@@ -1,6 +1,6 @@
 # Repository Template
 
-Detta repo innehåller applikationskod och GitOps-manifest för pr-flow.
+Detta repo innehåller applikationskod och GitOps-manifest för repo-template.
 
 ## Applikationsarkitektur
 
@@ -75,13 +75,13 @@ go build -o cli ./cmd/cli
 
 ```mermaid
 flowchart LR
-    subgraph APP_REPO["📁 pr-flow (detta repo)"]
+    subgraph APP_REPO["📁 repo-template (detta repo)"]
         CODE["frontend/"]
         MANIFESTS["environments/"]
     end
 
     subgraph INFRA_REPO["📁 infrastructure"]
-        FLUX_CONFIG["infrastructure-flux/apps/pr-flow/"]
+        FLUX_CONFIG["infrastructure-flux/apps/repo-template/"]
     end
 
     subgraph K8S["☸ Kubernetes"]
@@ -101,7 +101,7 @@ flowchart LR
 
 ## Repositories
 
-### pr-flow (detta repo)
+### repo-template (detta repo)
 
 Innehåller:
 
@@ -113,7 +113,7 @@ Innehåller:
 
 Innehåller:
 
-- **Flux-konfiguration** i `infrastructure-flux/apps/pr-flow/`
+- **Flux-konfiguration** i `infrastructure-flux/apps/repo-template/`
 - **Kubernetes-komponenter** i `infrastructure-flux/components/`
 
 ---
@@ -121,7 +121,7 @@ Innehåller:
 ## Mappstruktur
 
 ```
-pr-flow/
+repo-template/
 ├── .github/
 │   └── workflows/
 │       ├── ci-for-js-app.yaml        # Kör tester + bygger image
@@ -199,7 +199,7 @@ resources:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: pr-flow
+  name: repo-template
   labels:
     environment: production # ← Unik för prod
 ```
@@ -225,11 +225,11 @@ patches:
 
 ## Hur Flux hittar manifesten
 
-### I `infrastructure/infrastructure-flux/apps/pr-flow/`
+### I `infrastructure/infrastructure-flux/apps/repo-template/`
 
 ```
-infrastructure-flux/apps/pr-flow/
-├── gitrepository.yaml        # ← Flux läser pr-flow repo
+infrastructure-flux/apps/repo-template/
+├── gitrepository.yaml        # ← Flux läser repo-template repo
 ├── flux-kustomization.yaml  # ← Två Kustomizations
 └── kustomization.yaml
 ```
@@ -239,10 +239,10 @@ infrastructure-flux/apps/pr-flow/
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: pr-flow
+  name: repo-template
   namespace: flux-system
 spec:
-  url: ssh://git@github.com/simonbrundin/pr-flow
+  url: ssh://git@github.com/simonbrundin/repo-template
   ref:
     branch: main
 ```
@@ -254,24 +254,24 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: pr-flow
+  name: repo-template
 spec:
-  path: environments/production # ← Läser pr-flow/environments/production
+  path: environments/production # ← Läser repo-template/environments/production
   sourceRef:
     kind: GitRepository
-    name: pr-flow
+    name: repo-template
 
 ---
 # PR Previews
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: pr-flow-previews
+  name: repo-template-previews
 spec:
-  path: ./environments/pr # ← Läser pr-flow/environments/pr
+  path: ./environments/pr # ← Läser repo-template/environments/pr
   sourceRef:
     kind: GitRepository
-    name: pr-flow
+    name: repo-template
   prune: true # Städar bort resurser vid borttagning
 ```
 
@@ -339,7 +339,7 @@ flowchart TB
 | 6    | Skapar `environments/pr/<NUM>/`                 | med base + patches                  |
 | 7    | Uppdaterar `environments/pr/kustomization.yaml` | Lägger till `./<NUM>`               |
 | 8    | Commit & push                                   | Till PR-branchen                    |
-| 9    | Flux ser ändringarna                            | `infrastructure-flux/apps/pr-flow/` |
+| 9    | Flux ser ändringarna                            | `infrastructure-flux/apps/repo-template/` |
 | 10   | Flux deployar                                   | `pr-<NUM>` namespace                |
 
 ### PR Stängning
@@ -396,11 +396,11 @@ flowchart TB
 infrastructure/
 └── infrastructure-flux/
     └── apps/
-        └── pr-flow/                    # ← Konfiguration för denna app
-            ├── gitrepository.yaml       # Läser pr-flow repo
+        └── repo-template/                    # ← Konfiguration för denna app
+            ├── gitrepository.yaml       # Läser repo-template repo
             └── flux-kustomization.yaml  # Två Kustomizations:
-                                         #   - pr-flow (production)
-                                         #   - pr-flow-previews (PRs)
+                                         #   - repo-template (production)
+                                         #   - repo-template-previews (PRs)
 ```
 
 ### Lägga till en ny app
