@@ -19,8 +19,8 @@ resources:
       - path: /docs/#tag/health/GET/health
         name: Health
 
-  postgres:
+  # Dev database resources (CNPG Cluster + ConfigMaps)
+  # No workload name - these are managed by CNPG operator
+  dev-db:
     type: kustomization
-    path: ../base/db
-    workload: repo-template-db
-    port: 5432
+    path: ./db
