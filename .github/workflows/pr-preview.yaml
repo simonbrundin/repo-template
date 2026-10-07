@@ -106,14 +106,14 @@ patches:
           pr-number: "{pr_num}"
     target:
       kind: Namespace
-      name: pr-flow
+      name: repo-template
   - patch: |-
       apiVersion: apps/v1
       kind: Deployment
       metadata:
         name: app
         labels:
-          app: pr-flow
+          app: repo-template
           preview: "true"
       spec:
         replicas: 1

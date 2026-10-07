@@ -7,6 +7,7 @@ resources:
     links:
       - path: /health/
         name: Health
+
   go-api:
     type: dockerfile
     image-name: go-api
@@ -17,3 +18,8 @@ resources:
         name: Scalar
       - path: /docs/#tag/health/GET/health
         name: Health
+
+  postgres:
+    type: kustomization
+    path: ./db
+    port: 5432

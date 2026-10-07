@@ -21,7 +21,8 @@
 | **Frontend** | Nuxt 3 (SPA) | `nginx:alpine`      | 80   | Interface, statiska filer |
 | **API**      | Go + Gin     | `gcr.io/distroless` | 8080 | REST API, affärslogik     |
 | **CLI**      | Go           | Lokal binär         | -    | Utvecklingsverktyg        |
-| **Databas**  | PostgreSQL   | (extern)            | 5432 | Data-lagring              |
+| **Databas**  | PostgreSQL   | CNPG                | 5432 | Data-lagring (Kubernetes) |
+| **Schema**   | Atlas        | Operator            | -    | Schema-migration (K8s)    |
 
 ## Kommunikation
 
@@ -131,13 +132,23 @@ src/
 │   ├── nuxt.config.ts # SPA-konfiguration
 │   └── Dockerfile     # Multi-stage: dev + nginx-prod
 │
+├── postgres/          # PostgreSQL schema
+│   └── schema.sql     # Databas-schema (hanteras av Atlas)
+│
 └── go/                # Backend (Go API)
     ├── cmd/
     │   ├── api/       # REST API entry point
     │   └── cli/       # CLI + TUI (counter-demo)
-    ├── internal/      # Intern logik (counter)
+    ├── internal/      # Intern logik
+    │   └── counter/   # Counter domain (exempel)
     ├── go.mod         # Go dependencies
     └── Dockerfile     # Multi-stage: distroless runtime
+
+environments/
+├── base/              # Gemensamma manifests
+│   ├── postgres-cluster.yaml  # CNPG Cluster
+│   └── atlas-schema.yaml     # Atlas Schema CRD
+└── ...                # Miljö-specifika overrides
 ```
 
 ## Kommunikation
@@ -237,11 +248,86 @@ services:
     image: postgres:16
 ```
 
+## Databas
+
+### Arkitektur
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Kubernetes Cluster                        │
+│                                                             │
+│   ┌─────────────┐       ┌─────────────┐                    │
+│   │   CNPG      │──────▶│  PostgreSQL │                    │
+│   │  Operator   │       │   Cluster   │                    │
+│   └─────────────┘       └─────────────┘                    │
+│         │                                                 │
+│         ▼                                                 │
+│   ┌─────────────┐       ┌─────────────┐                    │
+│   │    Atlas    │──────▶│  Database   │                    │
+│   │  Operator   │       │   Schema    │                    │
+│   └─────────────┘       └─────────────┘                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Stack
+
+| Komponent        | Teknología | Syfte                        |
+| ---------------- | ---------- | ---------------------------- |
+| **CNPG**         | Operator   | PostgreSQL cluster management |
+| **Atlas Operator**| Operator   | Schema migration/deklarativ   |
+
+### Schema-hantering
+
+Schema definieras deklarativt i:
+- `src/postgres/schema.sql` - SQL-definitionsfil
+- `environments/base/atlas-schema.yaml` - Atlas CRD
+
+Atlas Operator reconcilerar databasen mot det definierade schemat.
+
+### Lägga till/en ändra schema
+
+1. **Redigera schema.sql** i `src/postgres/`
+2. **Uppdatera atlas-schema.yaml** med nya SQL:en
+3. **Applicera ändringar** - Atlas planerar och kör migreringar
+
+### CNPG Credentials
+
+CNPG skapar automatiskt:
+- Secret: `repo-template-db-app-user` (app-användare)
+- Secret: `repo-template-db-superuser` (superuser)
+- Service: `repo-template-db-rw` (read-write)
+
+### Connection String
+
+```
+postgres://app:<password>@repo-template-db-rw.default.svc.cluster.local:5432/app
+```
+
 ## Mermaid ER-diagram (databas)
 
 ```mermaid
 erDiagram
-    %% Lägg till tabeller här när databas-schema skapas
+    users {
+        bigint id PK
+        varchar email
+        varchar name
+        varchar password
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    audit_log {
+        bigint id PK
+        bigint user_id FK
+        varchar action
+        varchar entity_type
+        bigint entity_id
+        jsonb details
+        inet ip_address
+        timestamptz created_at
+    }
+
+    users ||--o{ audit_log : "has"
 ```
 
 ## Mermaid Arkitektur-diagram
@@ -280,10 +366,28 @@ flowchart LR
 
 ### Lägga till en ny tabell
 
-1. Lägg till schema i `src/go/internal/db/migrations/`
-2. Skapa model + repository i `src/go/internal/`
-3. Lägg till route i `src/go/cmd/api/main.go`
-4. Uppdatera ER-diagram i denna fil
+1. **Redigera schema** - Lägg till tabellen i `src/postgres/schema.sql`
+2. **Uppdatera Atlas CRD** - Kopiera SQL till `environments/base/atlas-schema.yaml`
+3. **Skapa model + repository** i `src/go/internal/`
+4. **Lägg till route** i `src/go/cmd/api/main.go`
+5. **Uppdatera ER-diagram** i denna fil (AGENTS.md)
+
+### Schema-migrering med Atlas
+
+Atlas Operator hanterar schema-migreringar automatiskt:
+
+```yaml
+# I environments/base/atlas-schema.yaml
+spec:
+  schema:
+    sql: |
+      CREATE TABLE new_table (...);
+```
+
+Vid apply:
+1. Atlas jämför önskat schema med faktiskt
+2. Genererar och kör nödvändiga ALTER-statements
+3. Destructiva ändringar blockeras av policy (review: ERROR)
 
 ### Lägga till en ny sida
 

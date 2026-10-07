@@ -6,4 +6,5 @@ kind: Kustomization
 
 resources:
   - ../base
+  - ./template/db
   - httproute.yaml
