@@ -47,15 +47,25 @@ func withHost(specJSON []byte, host string) ([]byte, error) {
 func main() {
 	r := gin.Default()
 
-	// CORS middleware - allow all origins for development
-	// In production, use AllowedOrigins in config
-	r.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
+	// CORS middleware - only enable if CORS_ORIGINS is set
+	// In production with same-origin (nginx proxy), CORS_ORIGINS can be empty
+	corsOrigins := os.Getenv("CORS_ORIGINS")
+	if corsOrigins != "" {
+		corsConfig := cors.Config{
+			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+		}
+		if corsOrigins == "*" {
+			// Development: allow all origins
+			corsConfig.AllowAllOrigins = true
+		} else {
+			// Specific origins
+			corsConfig.AllowOrigins = strings.Split(corsOrigins, ",")
+		}
+		r.Use(cors.New(corsConfig))
+	}
 
 	// API documentation with Scalar UI
 	r.GET("/docs/*any", openapiui.WrapHandler(openapiui.Config{

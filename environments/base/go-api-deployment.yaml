@@ -40,3 +40,5 @@ spec:
               value: "dev"
             - name: API_HOST
               value: ""
+            - name: CORS_ORIGINS
+              value: "*"
