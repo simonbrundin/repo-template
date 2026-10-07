@@ -2,6 +2,33 @@
 
 Detta repo innehåller applikationskod och GitOps-manifest för pr-flow.
 
+## Applikationsarkitektur
+
+```mermaid
+flowchart LR
+    Browser["🌐 Browser"]
+    Nuxt["📱 Nuxt SPA (nginx)"]
+    API["⚙️ Go API (Gin)"]
+    DB["🗄️ PostgreSQL"]
+
+    Browser -->|HTTP| Nuxt
+    Nuxt -->|fetch| API
+    API -->|SQL| DB
+```
+
+| Lager | Teknologi | Docker Image | Port | Syfte |
+|-------|-----------|-------------|------|-------|
+| **Frontend** | Nuxt 3 (SPA) | `nginx:alpine` | 80 | Interface |
+| **API** | Go + Gin | `distroless` | 8080 | REST API, affärslogik |
+| **Databas** | PostgreSQL | (extern) | 5432 | Data-lagring |
+
+### Varför SPA?
+
+- **Enklare byta frontend** - Nuxt/Vue kan bytas ut mot React/Svelte utan att ändra API
+- **Backend logik i Go** - All affärslogik, databashantering och API-endpoints är i Go
+- **Löst kopplade komponenter** - Frontend och backend utvecklas och deployas separat
+- **Mindre Docker-image** - nginx:alpine (63MB) istället för Node-runtime (280MB)
+
 ---
 
 ## Översikt

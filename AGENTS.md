@@ -132,9 +132,9 @@ flowchart LR
 
 | Beslut | Motivering |
 |--------|----------|
-| **Nuxt SPA (ej SSR)** | SEO oviktigt, enklare arkitektur, mindre image |
-| **Go API** | Snabb, enkel distribution, bra för REST |
-| **Separerade containers** | Skalas oberoende, ren separation |
+| **Nuxt SPA (ej SSR)** | SEO oviktigt, enklare arkitektur, mindre image, enklare att byta frontend |
+| **Go API** | Snabb, enkel distribution, bra för REST, all affärslogik här |
+| **Separerade containers** | Skalas oberoende, ren separation, frontend-backend oberoende |
 | **nginx för SPA** | Minimal image (63MB), bra för statiska filer |
 | **distroless för Go** | Minimal image (20MB), säkert |
 
