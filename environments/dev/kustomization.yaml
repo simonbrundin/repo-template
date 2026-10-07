@@ -5,21 +5,3 @@ namespace: dev
 
 resources:
   - ../base
-
-configMapGenerator:
-  - name: nuxt-config
-    literals:
-      - NUXT_PUBLIC_API_BASE=http://localhost:17998
-
-patches:
-  - target:
-      kind: Deployment
-      name: nuxt-app
-    patch: |
-      - op: remove
-        path: /spec/template/spec/containers/0/env
-      - op: add
-        path: /spec/template/spec/containers/0/envFrom
-        value:
-          - configMapRef:
-              name: nuxt-config
