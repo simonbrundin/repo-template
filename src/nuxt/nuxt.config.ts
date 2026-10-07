@@ -19,6 +19,11 @@ export default defineNuxtConfig({
     '/**': { ssr: false },
   },
 
+  // Router-konfiguration
+  router: {
+    trailingSlash: false,
+  },
+
   // Miljövariabel för API endpoint
   runtimeConfig: {
     public: {
