@@ -16,23 +16,24 @@ spec:
         - name: nuxt-app
           image: nuxt-app:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 80
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: "64Mi"
+              cpu: "50m"
             limits:
-              memory: "256Mi"
-              cpu: "500m"
+              memory: "128Mi"
+              cpu: "200m"
           livenessProbe:
             httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 10
+              path: /index.html
+              port: 80
+            initialDelaySeconds: 5
             periodSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 5
+              path: /index.html
+              port: 80
+            initialDelaySeconds: 3
             periodSeconds: 5
