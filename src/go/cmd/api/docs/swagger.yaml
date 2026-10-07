@@ -1,5 +1,4 @@
 basePath: /
-host: localhost:8080
 info:
   contact: {}
   description: API for repo-template project
