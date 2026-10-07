@@ -1,10 +1,10 @@
 resources:
-  nuxt:
+  nuxt-app:
     type: dockerfile
     image-name: nuxt-app
     dockerfile: ../../src/nuxt
     port: 80
-  go:
+  go-api:
     type: dockerfile
     image-name: go-api
     dockerfile: ../../src/go

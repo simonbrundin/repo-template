@@ -1,5 +1,5 @@
 resources:
-  nuxt:
+  nuxt-app:
     type: dockerfile
     image-name: nuxt-app
     dockerfile: src/nuxt
