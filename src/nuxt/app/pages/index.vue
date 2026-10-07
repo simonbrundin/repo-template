@@ -33,7 +33,8 @@ async function fetchHealth() {
   error.value = null
   
   try {
-    const response = await fetch(`${config.public.apiBase}/health`)
+    // Use relative URL - nginx proxies /api/ to Go API
+    const response = await fetch('/api/health')
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`)
     }

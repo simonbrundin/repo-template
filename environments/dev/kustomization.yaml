@@ -9,7 +9,7 @@ resources:
 configMapGenerator:
   - name: nuxt-config
     literals:
-      - NUXT_PUBLIC_API_BASE=__API_URL__
+      - NUXT_PUBLIC_API_BASE=http://localhost:17998
 
 patches:
   - target:

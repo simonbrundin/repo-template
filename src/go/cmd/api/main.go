@@ -88,7 +88,7 @@ func main() {
 	// @Produce		json
 	// @Success		200	{object}	map[string]interface{}
 	// @Router		/health [get]
-	r.GET("/health", func(c *gin.Context) {
+	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":    "ok",
 			"version":   os.Getenv("APP_VERSION"),
@@ -102,7 +102,7 @@ func main() {
 	// @Produce		json
 	// @Success		200	{object}	map[string]string
 	// @Router		/hello [get]
-	r.GET("/hello", func(c *gin.Context) {
+	r.GET("/api/hello", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Hello, World!"})
 	})
 
