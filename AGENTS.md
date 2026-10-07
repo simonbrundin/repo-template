@@ -23,6 +23,56 @@
 | **CLI**      | Go           | Lokal binär         | -    | Utvecklingsverktyg        |
 | **Databas**  | PostgreSQL   | (extern)            | 5432 | Data-lagring              |
 
+## API Dokumentation (OpenAPI + Scalar)
+
+Go API använder OpenAPI 2.0 med Scalar UI för dokumentation:
+
+| Endpoint           | Beskrivning              |
+| ----------------- | ------------------------ |
+| `/docs/`          | Scalar UI (interaktiv)    |
+| `/docs/openapi.json` | OpenAPI specifikation    |
+
+### Setup
+
+1. **swaggo/swag** - Genererar OpenAPI-spec från Go-anmärkningar
+2. **gin-openapi** (PeterTakahashi) - Serverar Scalar UI
+
+### Lägga till dokumentation till en endpoint
+
+```go
+// @Summary		Health check
+// @Description	Returns the health status of the API
+// @Tags			health
+// @Produce		json
+// @Success		200	{object}	map[string]interface{}
+// @Router		/health [get]
+r.GET("/health", func(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{"status": "ok"})
+})
+```
+
+### Generera OpenAPI-spec
+
+```bash
+# Lokalt
+cd src/go && swag init -g cmd/api/main.go -o cmd/api/docs --parseFuncBody
+
+# I Docker (automatiskt under build)
+```
+
+### Docker
+
+OpenAPI-spec genereras i separat Docker-stage och kopieras till `/app/docs/`.
+
+```dockerfile
+FROM golang:1.27-alpine AS swag
+RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
+RUN swag init -g cmd/api/main.go -o cmd/api/docs --parseFuncBody
+
+COPY --from=swag /build/cmd/api/docs /app/docs
+ENV DOCS_PATH=/app/docs/swagger.json
+```
+
 ## Kataloger
 
 ```

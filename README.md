@@ -23,6 +23,17 @@ flowchart LR
 | **CLI**      | Go          | Lokal binär    | -    | Utvecklingsverktyg   |
 | **Databas**  | PostgreSQL   | (extern)       | 5432 | Data-lagring          |
 
+### API Dokumentation
+
+Go API har OpenAPI-dokumentation med Scalar UI:
+
+| Endpoint | Beskrivning |
+| -------- | ----------- |
+| `/docs/` | Scalar UI (dark theme) |
+| `/docs/openapi.json` | OpenAPI spec |
+
+Dokumentation genereras med **swaggo/swag** och serveras med **gin-openapi**.
+
 ### CLI-verktyg
 
 CLI-verktyg kompileras lokalt (ej i Docker) för enkelhet:
