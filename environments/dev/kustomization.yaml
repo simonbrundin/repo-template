@@ -6,14 +6,20 @@ namespace: dev
 resources:
   - ../base
 
+configMapGenerator:
+  - name: nuxt-config
+    literals:
+      - NUXT_PUBLIC_API_BASE=__API_URL__
+
 patches:
-  # Add NUXT_PUBLIC_API_BASE for local development
   - target:
       kind: Deployment
       name: nuxt-app
     patch: |
-      - op: add
+      - op: remove
         path: /spec/template/spec/containers/0/env
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
         value:
-          - name: NUXT_PUBLIC_API_BASE
-            value: "http://localhost:17998"
+          - configMapRef:
+              name: nuxt-config
