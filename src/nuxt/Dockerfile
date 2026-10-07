@@ -9,7 +9,7 @@
 #   - base: Shared dependencies
 #   - dev: Development server (bun)
 #   - builder: Builds static SPA files
-#   - runtime: nginx serves static files + proxies API
+#   - runtime: nginx serves static files
 #
 # Usage:
 #   Development: docker build --target dev -t nuxt-dev . && docker run -it -p 3000:3000 nuxt-dev
@@ -50,19 +50,15 @@ COPY . .
 RUN bun run generate
 
 # =============================================================================
-# Runtime Stage: Serve static files with nginx (SPA + API proxy)
+# Runtime Stage: Serve static files with nginx
 # =============================================================================
 FROM nginx:alpine AS production
-
-# API server URL (can be overridden at runtime with --build-arg)
-ARG API_SERVER=go-api-service:8080
-ENV API_SERVER=$API_SERVER
 
 # Copy generated static files
 COPY --from=builder /app/.output/public /usr/share/nginx/html
 
-# Copy nginx config for SPA fallback + API proxy
-COPY --chown=nginx:nginx <<EOF /etc/nginx/conf.d/default.conf
+# Copy nginx config for SPA fallback
+COPY --chown=nginx:nginx <<'EOF' /etc/nginx/conf.d/default.conf
 server {
     listen 80;
     server_name _;
@@ -73,19 +69,9 @@ server {
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
 
-    # Proxy API requests to Go API
-    location /api/ {
-        proxy_pass http://${API_SERVER}/;
-        proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-
     # SPA fallback - all routes go to index.html
     location / {
-        try_files \$uri \$uri/ /index.html;
+        try_files $uri $uri/ /index.html;
     }
 
     # Cache static assets
