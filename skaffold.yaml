@@ -1,0 +1,30 @@
+# Skaffold configuration for local Kubernetes development
+# Usage: skaffold dev
+apiVersion: skaffold/v4
+kind: Config
+
+build:
+  artifacts:
+    - image: go-api
+      docker:
+        dockerfile: src/go/Dockerfile
+        context: src/go
+    - image: nuxt-app
+      docker:
+        dockerfile: src/nuxt/Dockerfile
+        context: src/nuxt
+
+deploy:
+  kubectl:
+    manifests:
+      - environments/dev/*.yaml
+
+portForward:
+  - resourceType: service
+    resourceName: go-api
+    port: 8080
+    localPort: 8080
+  - resourceType: service
+    resourceName: nuxt-app
+    port: 80
+    localPort: 3000
