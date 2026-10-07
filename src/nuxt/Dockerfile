@@ -65,8 +65,9 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
-    # Prevent nginx from redirecting to paths with trailing slashes
-    absolute_redirect off;
+    # Keep port in redirects
+    port_in_redirect on;
+    server_name_in_redirect off;
 
     # Gzip compression
     gzip on;
@@ -82,9 +83,13 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # SPA fallback - preserve path for Nuxt Router
+    # SPA routes - don't add trailing slash, serve index.html
+    location ~ ^/[a-zA-Z0-9_-]+$ {
+        try_files $uri /index.html;
+    }
+
     location / {
-        try_files $uri $uri/ /index.html$is_args$args;
+        try_files $uri $uri/ /index.html?$args;
     }
 
     # Cache static assets
