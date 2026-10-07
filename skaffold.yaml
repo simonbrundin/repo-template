@@ -1,6 +1,6 @@
 # Skaffold configuration for local Kubernetes development
 # Usage: skaffold dev
-apiVersion: skaffold/v3beta4
+apiVersion: skaffold/v4beta14
 kind: Config
 
 build:
