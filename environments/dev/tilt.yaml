@@ -18,9 +18,3 @@ resources:
         name: Scalar
       - path: /docs/#tag/health/GET/health
         name: Health
-
-  # Dev database resources (CNPG Cluster + ConfigMaps)
-  # No workload name - these are managed by CNPG operator
-  dev-db:
-    type: kustomization
-    path: ./db
