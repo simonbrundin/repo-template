@@ -16,11 +16,26 @@ flowchart LR
     API -->|SQL| DB
 ```
 
-| Lager | Teknologi | Docker Image | Port | Syfte |
-|-------|-----------|-------------|------|-------|
-| **Frontend** | Nuxt 3 (SPA) | `nginx:alpine` | 80 | Interface |
-| **API** | Go + Gin | `distroless` | 8080 | REST API, affärslogik |
-| **Databas** | PostgreSQL | (extern) | 5432 | Data-lagring |
+| Lager        | Teknologi    | Docker Image   | Port | Syfte                 |
+| ------------ | ------------ | -------------- | ---- | --------------------- |
+| **Frontend** | Nuxt 3 (SPA) | `nginx:alpine` | 80   | Interface             |
+| **API**      | Go + Gin     | `distroless`   | 8080 | REST API, affärslogik |
+| **CLI**      | Go          | Lokal binär    | -    | Utvecklingsverktyg   |
+| **Databas**  | PostgreSQL   | (extern)       | 5432 | Data-lagring          |
+
+### CLI-verktyg
+
+CLI-verktyg kompileras lokalt (ej i Docker) för enkelhet:
+
+```bash
+# Kompilera och kör CLI
+cd src/go
+go build -o cli ./cmd/cli
+./cli tui    # Interaktiv TUI
+./cli get    # Visa räknare
+./cli inc    # Öka
+./cli dec    # Minska
+```
 
 ### Varför SPA?
 

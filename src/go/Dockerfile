@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1
 #
-# Go API + CLI - Multi-stage build with distroless runtime
+# Go API - Multi-stage build with distroless runtime
+#
+# Note: CLI verktyg kompileras lokalt, inte i Docker.
+# Se README.md för hur man bygger CLI lokalt.
 #
 # Best practices applied:
 # - Multi-stage build (builder/runtime separation)
