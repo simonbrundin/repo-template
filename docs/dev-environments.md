@@ -94,11 +94,14 @@ Kör lokalkod direkt i cluster-kontext (INGEN image-building!).
 # Installera Mirrord
 brew install metalbear-co/mirrord/mirrord
 
-# I valfri Go/Node/Python-app, kör med:
-mirrord run -- <your-app-command>
+# Använd exec för att spegla trafik till en pod
+mirrord exec --target deployment/nuxt-app -n default -- <kommando>
 
-# Eller som VS Code extension:
-# Sök efter "Mirrord" i Extensions
+# Testa anslutning
+mirrord exec --target deployment/nuxt-app -n default -- curl http://localhost
+
+# Med lokalt dev-server (kräver att server kör på samma port som pod)
+mirrord exec --target deployment/nuxt-app -n default -- curl http://localhost:3000
 ```
 
 **Fördelar:**
