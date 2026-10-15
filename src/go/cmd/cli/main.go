@@ -54,7 +54,7 @@ func (m tuiModel) View() string {
 		return "Goodbye!\n"
 	}
 	return fmt.Sprintf(
-		"%s\n\n  %s %d  %s\n\n  %s\n",
+		"%s\n\n  %s %s  %s\n\n  %s\n",
 		titleStyle.Render("🧮 Counter TUI"),
 		"Count:",
 		numberStyle.Render(fmt.Sprintf("%d", m.count)),
