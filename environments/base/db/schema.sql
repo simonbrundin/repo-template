@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     name        VARCHAR(255) NOT NULL,
     password    VARCHAR(255) NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The application must update this value on row updates.
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -28,18 +29,3 @@ CREATE TABLE IF NOT EXISTS audit_log (
 -- Index for audit log queries
 CREATE INDEX IF NOT EXISTS idx_audit_log_user_id ON audit_log(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at DESC);
-
--- Updated at trigger function
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Apply trigger to users table
-CREATE TRIGGER update_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();

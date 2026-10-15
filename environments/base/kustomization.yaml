@@ -10,4 +10,4 @@ resources:
   - nuxt-service.yaml
   - go-api-deployment.yaml
   - go-api-service.yaml
-  - db/atlas-schema.yaml
+  # Database resources are added by environment overlays.

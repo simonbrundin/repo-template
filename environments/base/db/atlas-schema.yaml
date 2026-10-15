@@ -7,8 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: repo-template
 spec:
-  # Database connection via CNPG secret
-  # CNPG creates: repo-template-db-app (with password)
+  # Each environment must provide a Secret with the connection URI in key `uri`.
   urlFrom:
     secretKeyRef:
       key: uri

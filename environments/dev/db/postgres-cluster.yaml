@@ -3,6 +3,7 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: repo-template-db
+  namespace: dev
 spec:
   instances: 1
 
@@ -10,6 +11,8 @@ spec:
     initdb:
       database: app
       owner: app
+      secret:
+        name: repo-template-db-app-credentials
 
   storage:
     storageClass: cnpg

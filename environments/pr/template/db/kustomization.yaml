@@ -4,16 +4,5 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 resources:
   - ../../../base/db
-
-# ConfigMap with schema + seeds (same as dev)
-configMapGenerator:
-  - name: repo-template-db-schema
-    behavior: replace
-    files:
-      - schema.sql=../../../base/db/schema.sql
-      - seeds.sql=../../../base/db/seeds.sql
