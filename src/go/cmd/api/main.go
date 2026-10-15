@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	openapiui "github.com/PeterTakahashi/gin-openapi/openapiui"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	openapiui "github.com/PeterTakahashi/gin-openapi/openapiui"
 )
 
 // @title			Repo Template API
