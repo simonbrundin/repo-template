@@ -1,0 +1,8 @@
+# Namespace for dev resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: repo-template
