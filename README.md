@@ -20,7 +20,7 @@ flowchart LR
 | ------------ | ------------ | -------------- | ---- | --------------------- |
 | **Frontend** | Nuxt 3 (SPA) | `nginx:alpine` | 80   | Interface + API proxy |
 | **API**      | Go + Gin     | `distroless`   | 8080 | REST API, affärslogik |
-| **CLI**      | Go          | Lokal binär    | -    | Utvecklingsverktyg   |
+| **CLI**      | Go           | Lokal binär    | -    | Utvecklingsverktyg    |
 | **Databas**  | PostgreSQL   | (extern)       | 5432 | Data-lagring          |
 
 ### Frontend → API Kommunikation
@@ -33,6 +33,7 @@ Browser → Nuxt SPA → nginx → Go API
 ```
 
 **Fördelar:**
+
 - Samma-origin anrop (ingen CORS)
 - Inga hårdkodade portar
 - Samma kod i dev och prod
@@ -41,10 +42,10 @@ Browser → Nuxt SPA → nginx → Go API
 
 Go API har OpenAPI-dokumentation med Scalar UI:
 
-| Endpoint | Beskrivning |
-| -------- | ----------- |
-| `/docs/` | Scalar UI (dark theme) |
-| `/docs/openapi.json` | OpenAPI spec |
+| Endpoint             | Beskrivning            |
+| -------------------- | ---------------------- |
+| `/docs/`             | Scalar UI (dark theme) |
+| `/docs/openapi.json` | OpenAPI spec           |
 
 Dokumentation genereras med **swaggo/swag** och serveras med **gin-openapi**.
 
@@ -329,18 +330,18 @@ flowchart TB
 
 ### Steg-för-steg
 
-| Steg | Action                                          | Var                                 |
-| ---- | ----------------------------------------------- | ----------------------------------- |
-| 1    | Developer skapar PR                             | GitHub                              |
-| 2    | GitHub Actions triggas                          | `.github/workflows/pr-preview.yaml` |
-| 3    | Kör tester                                      | CI                                  |
-| 4    | Bygger image                                    | `frontend/Dockerfile`               |
-| 5    | Pushar till GHCR                                | Tag: `pr-<NUM>-<sha>`               |
-| 6    | Skapar `environments/pr/<NUM>/`                 | med base + patches                  |
-| 7    | Uppdaterar `environments/pr/kustomization.yaml` | Lägger till `./<NUM>`               |
-| 8    | Commit & push                                   | Till PR-branchen                    |
+| Steg | Action                                          | Var                                       |
+| ---- | ----------------------------------------------- | ----------------------------------------- |
+| 1    | Developer skapar PR                             | GitHub                                    |
+| 2    | GitHub Actions triggas                          | `.github/workflows/pr-preview.yaml`       |
+| 3    | Kör tester                                      | CI                                        |
+| 4    | Bygger image                                    | `frontend/Dockerfile`                     |
+| 5    | Pushar till GHCR                                | Tag: `pr-<NUM>-<sha>`                     |
+| 6    | Skapar `environments/pr/<NUM>/`                 | med base + patches                        |
+| 7    | Uppdaterar `environments/pr/kustomization.yaml` | Lägger till `./<NUM>`                     |
+| 8    | Commit & push                                   | Till PR-branchen                          |
 | 9    | Flux ser ändringarna                            | `infrastructure-flux/apps/repo-template/` |
-| 10   | Flux deployar                                   | `pr-<NUM>` namespace                |
+| 10   | Flux deployar                                   | `pr-<NUM>` namespace                      |
 
 ### PR Stängning
 
@@ -563,3 +564,172 @@ flowchart TB
 erDiagram
     %!generate db diagram from schema.sql
 ```
+
+### Schema-hantering
+
+Databasen hanteras via **Atlas Operator** i Kubernetes. Schemat definieras deklarativt och reconcilas automatiskt.
+
+#### Arkitektur
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  environments/base/db/                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  schema.sql ──kustomize──▶ ConfigMap ──Atlas──▶ PostgreSQL  │
+│                                                              │
+│  atlas-schema.yaml ──Flux──▶ AtlasSchema CRD                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Fil                  | Syfte                                          |
+| -------------------- | ---------------------------------------------- |
+| `schema.sql`         | SQL-definition av tabeller, index, constraints |
+| `atlas-schema.yaml`  | Atlas Operator CRD som pekar på ConfigMap      |
+| `kustomization.yaml` | Bygger ConfigMap från schema.sql               |
+
+#### Säkerhetspolicy
+
+Atlas Operator har `lint.destructive.error: true` - destruktiva ändringar (DROP TABLE, DROP COLUMN, etc.) blockeras och måste hanteras manuellt.
+
+---
+
+## Ändringsflöde: Dev → PR → Prod
+
+### Schema-ändringar
+
+**Alla schema-ändringar börjar i `environments/base/db/schema.sql`**:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Ändringsflöde                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  1. REDIGERA schema.sql                                              │
+│     └── environments/base/db/schema.sql                               │
+│                                                                      │
+│  2. TESTA lokalt (Tilt)                                              │
+│     └── environments/dev/                                            │
+│         └── Atlas Operator applicerar schema till dev-databas         │
+│                                                                      │
+│  3. SKAPA PR                                                         │
+│     └── PR Preview skapas med base-schema                            │
+│         └── Atlas applicerar schema till pr-<NUM>-databas            │
+│                                                                      │
+│  4. MERGE till main                                                  │
+│     └── Flux deployar till prod                                      │
+│         └── Atlas applicerar schema till produktions-databas          │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Steg-för-steg: Lägga till en ny tabell
+
+**1. Redigera base-schema**
+
+```bash
+# Editera schema.sql i base
+vim environments/base/db/schema.sql
+```
+
+```sql
+-- Lägg till ny tabell
+CREATE TABLE IF NOT EXISTS projects (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    name        VARCHAR(255) NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+```
+
+**2. Testa lokalt med Tilt**
+
+```bash
+cd environments/dev && tilt up
+# Atlas Operator applicerar automatiskt schemat till dev-databasen
+```
+
+**3. Verifiera i pgAdmin**
+
+Öppna `localhost:<port>` (anges av Tilt) och verifiera att:
+
+- Tabellen `projects` finns
+- Indexet `idx_projects_user_id` finns
+- Constraints är korrekta
+
+**4. Skapa Pull Request**
+
+```bash
+git checkout -b feat/add-projects-table
+git add environments/base/db/schema.sql
+git commit -m "feat: add projects table"
+git push -u origin HEAD
+```
+
+PR Preview deployas automatiskt med schema-ändringen.
+
+**5. Granska och mergea**
+
+- CI verifierar att schemat är giltigt
+- Reviewers granskar schema-ändringen
+- Vid merge → Flux applicerar till prod
+
+---
+
+### Application Code + Schema
+
+För kompletta features behöver du ibland ändra både applikationskod **och** schema:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Feature branch                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. src/go/internal/projects/      ← Go-kod (handlers, etc) │
+│                                                              │
+│  2. environments/base/db/schema.sql ← Database-schema        │
+│                                                              │
+│  3. environments/base/go-api-deployment.yaml  ← (ev. env)   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**CI/CD för kod + schema:**
+
+| Steg       | Vad händer                             |
+| ---------- | -------------------------------------- |
+| Push       | GitHub Actions bygger och pushar image |
+| PR Preview | Nytt schema + ny kod i pr-\<NUM\>      |
+| Merge      | Schema + kod till prod                 |
+
+---
+
+### Miljö-specifika schema-overrides
+
+Om en miljö behöver avvikande schema (t.ex. extra index för prestanda):
+
+```yaml
+# environments/prod/db/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base/db
+
+patches:
+  - target:
+      kind: AtlasSchema
+    patch: |
+      # Lägg till prod-specifika index
+      # OBS: Detta kan göra dev/pr avvikande från prod
+```
+
+**Bästa praxis:**
+
+- Behåll schemat så likt som möjligt mellan miljöer
+- Använd `IF NOT EXISTS` / `IF NOT EXISTS ... DROP` för säkra migreringar
+- Testa migrationscripts lokalt innan merge
+- Vid tveksamhet → börja enkelt, lägg till complexity vid behov
