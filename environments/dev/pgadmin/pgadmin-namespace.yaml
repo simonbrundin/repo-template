@@ -1,8 +1,0 @@
-# Namespace for pgAdmin in dev
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: pgadmin
-  labels:
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: pgadmin

@@ -3,7 +3,7 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: repo-template-db
-  namespace: dev
+  namespace: repo-template
 spec:
   instances: 1
 

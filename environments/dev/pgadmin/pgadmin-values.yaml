@@ -19,10 +19,10 @@ serverDefinitions:
   enabled: true
   resourceType: ConfigMap
   servers:
-    "repo-template-dev":
+    "repo-template":
       Name: "repo-template"
       Group: "Development"
-      Host: "repo-template-db-rw.dev.svc.cluster.local"
+      Host: "repo-template-db-rw.repo-template.svc.cluster.local"
       Port: 5432
       Username: "app"
       MaintenanceDB: "app"
